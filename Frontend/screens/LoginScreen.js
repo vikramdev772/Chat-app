@@ -1,50 +1,56 @@
 import {
-  StyleSheet,
-  Text,
-  View,
-  TextInput,
   KeyboardAvoidingView,
   Pressable,
-  Alert,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
 } from "react-native";
-import React, { useState } from "react";
+import React, { useState ,useEffect} from "react";
 import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import baseURL from "../base_url";
 
-const RegisterScreen = () => {
+const LoginScreen = () => {
   const [email, setEmail] = useState("");
-  const [name, setName] = useState("");
   const [password, setPassword] = useState("");
-  const [image, setImage] = useState("");
   const navigation = useNavigation();
-  const handleRegister = () => {
-    const user = {
-      name: name,
-      email: email,
-      password: password,
-      image: image,
+  useEffect(() => {
+    const checkLoginStatus = async () => {
+      try {
+        const token = await AsyncStorage.getItem("authToken");
+
+        if (token) {
+          navigation.replace("Home");
+        } else {
+          // token not found , show the login screen itself
+        }
+      } catch (error) {
+        console.log("error", error);
+      }
     };
 
-    // send a POST  request to the backend API to register the user
+    checkLoginStatus();
+  }, []);
+  const handleLogin = () => {
+    const user = {
+      email: email,
+      password: password,
+    };
+
     axios
-      .post("http://localhost:8000/register", user)
+      .post(`${baseURL}/login`, user)
       .then((response) => {
         console.log(response);
-        Alert.alert(
-          "Registration successful",
-          "You have been registered Successfully"
-        );
-        setName("");
-        setEmail("");
-        setPassword("");
-        setImage("");
+        const token = response.data.token;
+        AsyncStorage.setItem("authToken", token);
+
+        navigation.replace("Home");
       })
       .catch((error) => {
-        Alert.alert(
-          "Registration Error",
-          "An error occurred while registering"
-        );
-        console.log("registration failed", error);
+        Alert.alert("Login Error", "Invalid email or password");
+        console.log("Login Error", error);
       });
   };
   return (
@@ -65,35 +71,15 @@ const RegisterScreen = () => {
           }}
         >
           <Text style={{ color: "#4A55A2", fontSize: 17, fontWeight: "600" }}>
-            Register
+            Sign In
           </Text>
 
           <Text style={{ fontSize: 17, fontWeight: "600", marginTop: 15 }}>
-            Register To your Account
+            Sign In to Your Account
           </Text>
         </View>
 
         <View style={{ marginTop: 50 }}>
-          <View style={{ marginTop: 10 }}>
-            <Text style={{ fontSize: 18, fontWeight: "600", color: "gray" }}>
-              Name
-            </Text>
-
-            <TextInput
-              value={name}
-              onChangeText={(text) => setName(text)}
-              style={{
-                fontSize: email ? 18 : 18,
-                borderBottomColor: "gray",
-                borderBottomWidth: 1,
-                marginVertical: 10,
-                width: 300,
-              }}
-              placeholderTextColor={"black"}
-              placeholder="Enter your name"
-            />
-          </View>
-
           <View>
             <Text style={{ fontSize: 18, fontWeight: "600", color: "gray" }}>
               Email
@@ -135,28 +121,8 @@ const RegisterScreen = () => {
             />
           </View>
 
-          <View style={{ marginTop: 10 }}>
-            <Text style={{ fontSize: 18, fontWeight: "600", color: "gray" }}>
-              Image
-            </Text>
-
-            <TextInput
-              value={image}
-              onChangeText={(text) => setImage(text)}
-              style={{
-                fontSize: email ? 18 : 18,
-                borderBottomColor: "gray",
-                borderBottomWidth: 1,
-                marginVertical: 10,
-                width: 300,
-              }}
-              placeholderTextColor={"black"}
-              placeholder="Image"
-            />
-          </View>
-
           <Pressable
-            onPress={handleRegister}
+            onPress={handleLogin}
             style={{
               width: 200,
               backgroundColor: "#4A55A2",
@@ -175,16 +141,16 @@ const RegisterScreen = () => {
                 textAlign: "center",
               }}
             >
-              Register
+              Login
             </Text>
           </Pressable>
 
           <Pressable
-            onPress={() => navigation.goBack()}
+            onPress={() => navigation.navigate("Register")}
             style={{ marginTop: 15 }}
           >
             <Text style={{ textAlign: "center", color: "gray", fontSize: 16 }}>
-              Already Have an account? Sign in
+              Dont't have an account? Sign Up
             </Text>
           </Pressable>
         </View>
@@ -193,6 +159,6 @@ const RegisterScreen = () => {
   );
 };
 
-export default RegisterScreen;
+export default LoginScreen;
 
 const styles = StyleSheet.create({});

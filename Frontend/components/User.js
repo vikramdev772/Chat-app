@@ -1,6 +1,7 @@
 import { StyleSheet, Text, View, Pressable, Image } from "react-native";
 import React, { useContext, useState, useEffect } from "react";
 import { UserType } from "../UserContext";
+import baseURL from "../base_url";
 
 const User = ({ item }) => {
   const { userId, setUserId } = useContext(UserType);
@@ -11,7 +12,7 @@ const User = ({ item }) => {
     const fetchFriendRequests = async () => {
       try {
         const response = await fetch(
-          `http://localhost:8000/friend-requests/sent/${userId}`
+          `${baseURL}/friend-requests/sent/${userId}`
         );
 
         const data = await response.json();

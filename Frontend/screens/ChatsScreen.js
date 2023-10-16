@@ -3,7 +3,7 @@ import React, { useContext,useEffect,useState } from "react";
 import { UserType } from "../UserContext";
 import { useNavigation } from "@react-navigation/native";
 import UserChat from "../components/UserChat";
-
+import baseURL from "../base_url";
 
 const ChatsScreen = () => {
   const [acceptedFriends, setAcceptedFriends] = useState([]);
@@ -13,7 +13,7 @@ const ChatsScreen = () => {
     const acceptedFriendsList = async () => {
       try {
         const response = await fetch(
-          `http://localhost:8000/accepted-friends/${userId}`
+          `${baseURL}/accepted-friends/${userId}`
         );
         const data = await response.json();
 
